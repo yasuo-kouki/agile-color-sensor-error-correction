@@ -1,0 +1,16 @@
+余裕があるなら，それぞれの方法を2つずつ実装したものとの比較も載せる
+\section{実験結果}
+
+\subsection{モデル実装前のパラメーター増加に伴う精度変化}
+
+
+\subsection{スパース化の閾値の検討}
+
+
+\subsection{モデル実装による性能比較}
+メモリ縮減効果、実行速度、推論性能の比較
+% for f in *.h; do 
+bytes=$(stat -f%z "$f")
+bits=$((bytes * 8))
+echo "$f : $bytes bytes, $bits bits"
+done
