@@ -77,3 +77,4 @@ void predict(float input[INPUT_SIZE], float output[OUTPUT_SIZE]) {
 
 ## ライセンス
 リポジトリ全体のライセンスを設定していないため、公開時は用途に応じて `LICENSE` ファイルを追加してください。# agile-color-sensor-error-correction
+# agile-color-sensor-error-correction
