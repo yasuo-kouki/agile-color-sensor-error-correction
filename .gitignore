@@ -25,8 +25,10 @@ secret_key.txt
 
 # ディレクトリを無視
 data/
-スライド/
 過去モデル/
 
 *.h
 *.zip
+
+a.ipynb
+b.ipynb
