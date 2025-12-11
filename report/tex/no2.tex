@@ -1,10 +1,11 @@
 \subsection{実装方法}
-計画書と異なる実装とした場合は、その理由（たんに「実装が難しかっ
-たから」ではなく、第三者を納得させられる論理的な説明とすること）
+計画書と異なる実装とした場合は、その理由（単に「実装が難しかったから」ではなく、第三者を納得させられる論理的な説明とすること）。
 
-実装方法（アルゴリズム）の詳細、ソースコードの説明
+実装方法（アルゴリズム）の詳細、ソースコードの説明を以下に示す。
 
-
+% ------------------------
+% スパース化
+% ------------------------
 \subsubsection{スパース化の実装}
 
 スパース化（sparsification）とは，配列中の小さな値を0に置き換える操作であり，
@@ -14,89 +15,99 @@
 
 \begin{lstlisting}[caption=スパース化の実装,label=lst:sparsify]
 def sparsify_array(arr: np.ndarray, threshold: float = 0.01):
-arr_copy = arr.copy()
-arr_copy[np.abs(arr_copy) < threshold] = 0
-return arr_copy
+    arr_copy = arr.copy()
+    arr_copy[np.abs(arr_copy) < threshold] = 0
+    return arr_copy
 \end{lstlisting}
 
-まず入力配列 \texttt{arr} をコピーし，変更可能な配列 \texttt{arr_copy} を作成する．
+まず入力配列 \texttt{arr} をコピーし，変更可能な配列 \texttt{arr\_copy} を作成する．
 続いて，絶対値が閾値 \texttt{threshold} 未満の要素を \texttt{0} に置き換える．
 最終的に，スパース化された配列を返す．
 
 この実装により，微小な値を0にすることでデータの疎性を高め，後続の計算処理の効率化やメモリ削減を実現できる．
 また，閾値を調整することで，疎性の度合いを柔軟に制御可能である．
 
-さらに，関数 \texttt{sparsify_array} の処理の流れを図\ref{fig:sparsify_flow}に示す．
-フローチャートでは，入力配列をコピーするステップと，閾値判定による要素の置換が明確に表されている．
-処理手順は以下の通りである．
+さらに，関数 \texttt{sparsify\_array} の処理の流れを図\ref{fig:sparsify_flow}に示す．
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.45\columnwidth]{../img/tex_2/no1.png}
+    \caption{スパース化のフローチャート}
+    \label{fig:sparsify_flow}
+\end{figure}
 
 
-
-
-
-
-
-
-
+% ------------------------
+% 量子化
+% ------------------------
 \subsubsection{量子化の実装}
+
 量子化とは，実数値を有限の整数値範囲に写像する操作であり，
 ここでは代表的な8ビット量子化（int8 quantization）を採用した．
-実装にはNumPyを用い，入力配列をスケーリングして
-8ビット整数範囲\[−128,127\]\[-128, 127\]\[−128,127\]に丸め込む方式を採用した．
-スケーリング係数（scale）は，入力配列の絶対値の最大値が127に対応するように自動計算する．
+実装には NumPy を用い，入力配列をスケーリングして
+8ビット整数範囲 \([ -128, 127 ]\) に丸め込む方式を採用した．
+スケーリング係数（scale）は，入力配列の絶対値最大値が 127 に対応するように自動計算する．
 具体的な実装をリスト\ref{lst:quantize}に示す．
 
 \begin{lstlisting}[caption=量子化の実装,label=lst:quantize]
 def int8_quantize(arr: np.ndarray, scale=None):
-if scale is None:
-max_abs = float(np.max(np.abs(arr)))
-scale = max_abs / 127.0 if max_abs != 0 else 1.0
-q = np.round(arr / scale).astype(np.int32)
-q = np.clip(q, -128, 127).astype(np.int8)
-return q, scale
+    if scale is None:
+        max_abs = float(np.max(np.abs(arr)))
+        scale = max_abs / 127.0 if max_abs != 0 else 1.0
+    q = np.round(arr / scale).astype(np.int32)
+    q = np.clip(q, -128, 127).astype(np.int8)
+    return q, scale
 \end{lstlisting}
 
-まず入力配列 \texttt{arr} の絶対値最大値 \texttt{max_abs} を求め，
-それを127で割ることでスケーリング係数 \texttt{scale} を算出する．
+まず入力配列 \texttt{arr} の絶対値最大値 \texttt{max\_abs} を求め，
+それを 127 で割ることでスケーリング係数 \texttt{scale} を算出する．
 続いて，配列を \texttt{scale} で割り整数に丸めた後，
-範囲外の値を \texttt{np.clip} により [−128,127][-128,127][−128,127] に制限し，
+範囲外の値を \texttt{np.clip} により \([ -128, 127 ]\) に制限し，
 最終的に8ビット整数型（\texttt{np.int8}）として返す．
-また，同時にスケーリング係数を返すことで，後段の復元処理（dequantization）にも利用できる設計としている．
-この実装により，入力データの統計量に応じた動的なスケーリングを行いながら，
-情報損失を最小限に抑えた量子化を実現できる．
+また，同時にスケーリング係数を返すことで，後段の復元処理（dequantization）にも利用可能である．
 
-さらに，関数 \texttt{int8_quantize} の処理の流れを図\ref{fig:quantize_flow}に示す．
-このフローチャートでは，スケーリング係数の有無による分岐と，量子化処理の各段階が明確にしている
+さらに，関数 \texttt{int8\_quantize} の処理の流れを図\ref{fig:quantize_flow}に示す．
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.45\columnwidth]{../img/tex_2/no2.png}
+    \caption{量子化のフローチャート}
+    \label{fig:quantize_flow}
+\end{figure}
 
 
-
-
-
-
-
+% ------------------------
+% CSR
+% ------------------------
 \subsubsection{CSR配列生成の実装}
 
-本研究では，疎行列を効率的に格納するため，Compressed Sparse Row（CSR）形式への変換を行う関数 \texttt{to_csr} を実装した．
+本研究では，疎行列を効率的に格納するため，Compressed Sparse Row（CSR）形式への変換を行う関数 \texttt{to\_csr} を実装した．
 CSR形式は，非ゼロ要素のみをデータ配列に保持し，行インデックスや列インデックスを別途管理することで，メモリ効率の高い行列表現を可能にする方式である．
-本関数では入力テンソルをNumPy配列に変換した後，量子化を行い，さらにCSR形式に変換して，C言語で利用可能な配列文字列として出力する．
+本関数では入力テンソルを NumPy 配列に変換した後，量子化を行い，さらにCSR形式へ変換し，
+C言語で利用可能な配列文字列として出力する．
 具体的な実装をリスト\ref{lst:to_csr}に示す．
 
 \begin{lstlisting}[caption=CSR配列生成の実装,label=lst:to_csr]
 def to_csr(tensor: torch.Tensor, name: str, threshold: float = 0.01):
-arr = tensor.detach().numpy()
-arr_quantized, scale = quantize_array(arr, threshold)
-csr = csr_matrix(arr_quantized)
-data_str = f"int8_t {name}_data[] = {{ " + ", ".join(map(str, csr.data)) + " };"
-indices_str = f"int {name}_indices[] = {{ " + ", ".join(map(str, csr.indices)) + " };"
-indptr_str = f"int {name}_indptr[] = {{ " + ", ".join(map(str, csr.indptr)) + " };"
-shape_str = f"int {name}_shape[2] = {{{csr.shape[0]}, {csr.shape[1]}}};"
-scale_str = f"float {name}_scale = {scale};"
-
-return "\n".join([data_str, indices_str, indptr_str, shape_str, scale_str])
+    arr = tensor.detach().numpy()
+    arr_quantized, scale = quantize_array(arr, threshold)
+    csr = csr_matrix(arr_quantized)
+    data_str = f"int8_t {name}_data[] = {{ " + ", ".join(map(str, csr.data)) + " };"
+    indices_str = f"int {name}_indices[] = {{ " + ", ".join(map(str, csr.indices)) + " };"
+    indptr_str = f"int {name}_indptr[] = {{ " + ", ".join(map(str, csr.indptr)) + " };"
+    shape_str = f"int {name}_shape[2] = {{{csr.shape[0]}, {csr.shape[1]}}};"
+    scale_str = f"float {name}_scale = {scale};"
+    return "\n".join([data_str, indices_str, indptr_str, shape_str, scale_str])
 \end{lstlisting}
 
-関数 \texttt{to_csr} は以下の処理手順で動作する．
-この実装により，量子化と疎行列化を組み合わせつつ，C言語で直接利用可能な配列形式としてエクスポートすることが可能になる．
-フローチャートでは，テンソルの変換・量子化・CSR化・文字列生成の順序を明確に示すことができる．
-図\ref{fig:csr_flow}に処理の概要を示す．
+関数 \texttt{to\_csr} は以下の処理手順で動作する．
+本実装により，量子化と疎行列化を組み合わせつつ，
+C言語で直接利用可能な配列形式としてエクスポートすることが可能になる．
+処理の概要を図\ref{fig:csr_flow}に示す．
 
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.9\columnwidth]{../img/tex_2/no3.jpg}
+    \caption{CSR形式生成のフローチャート}
+    \label{fig:csr_flow}
+\end{figure}

@@ -2,7 +2,7 @@
 \citation{soumu2021}
 \citation{iot_resource_management}
 \citation{toshiba2019}
-\citation{iotmanagement}
+\citation{toshiba2019}
 \citation{toshiba2019}
 \citation{toshiba2019}
 \@writefile{toc}{\contentsline {subsection}{\numberline {0.1}実験の目的}{}{}\protected@file@percent }
@@ -12,10 +12,64 @@
 \@writefile{toc}{\contentsline {subsubsection}{\numberline {0.3.2}CSR形式への変換}{}{}\protected@file@percent }
 \@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces CSR形式変換のフローチャート}}{}{}\protected@file@percent }
 \newlabel{fig:a}{{1}{}{}{}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {0.3.3}量子化}{}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {0.4}評価指標}{}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {0.5}実装方法}{}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {0.5.1}スパース化の実装}{}{}\protected@file@percent }
+\newlabel{lst:sparsify}{{1}{}{}{}{}}
+\@writefile{lol}{\contentsline {lstlisting}{\numberline {1}スパース化の実装}{}{}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces スパース化のフローチャート}}{}{}\protected@file@percent }
+\newlabel{fig:sparsify_flow}{{2}{}{}{}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {0.5.2}量子化の実装}{}{}\protected@file@percent }
+\newlabel{lst:quantize}{{2}{}{}{}{}}
+\@writefile{lol}{\contentsline {lstlisting}{\numberline {2}量子化の実装}{}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {0.5.3}CSR配列生成の実装}{}{}\protected@file@percent }
+\newlabel{lst:to_csr}{{3}{}{}{}{}}
+\@writefile{lol}{\contentsline {lstlisting}{\numberline {3}CSR配列生成の実装}{}{}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces 量子化のフローチャート}}{}{}\protected@file@percent }
+\newlabel{fig:quantize_flow}{{3}{}{}{}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces CSR形式生成のフローチャート}}{}{}\protected@file@percent }
+\newlabel{fig:csr_flow}{{4}{}{}{}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {1}実験結果}{}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.1}ベースライン非圧縮モデルの性能}{}{}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces ベースモデルの計測結果（model_70 は測定不能）}}{}{}\protected@file@percent }
+\newlabel{tab:model_results}{{1}{}{}{}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces パラメータと MSE の関係}}{}{}\protected@file@percent }
+\newlabel{no7}{{5}{}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.2}スパース化のみ適応したモデルの性能}{}{}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {2}{\ignorespaces スパース化モデル（パラメータ=30）の測定結果}}{}{}\protected@file@percent }
+\newlabel{h_results}{{2}{}{}{}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces 閾値と MSE の関係}}{}{}\protected@file@percent }
+\newlabel{fig:spare}{{6}{}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.3}CSR 形式と int8 量子化を適応したモデルの性能}{}{}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {3}{\ignorespaces Sparse + CSR + int8（閾値 $\alpha = 0.005$）モデルの測定結果}}{}{}\protected@file@percent }
+\newlabel{tab:csr_int8_results}{{3}{}{}{}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {7}{\ignorespaces パラメータ と 削減率 の関係}}{}{}\protected@file@percent }
+\newlabel{no5}{{7}{}{}{}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {8}{\ignorespaces パラメータ と MSE の関係}}{}{}\protected@file@percent }
+\newlabel{no6}{{8}{}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.4}同一パラメータ数における比較}{}{}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {4}{\ignorespaces 通常モデルと Sparse + CSR + int8（$\alpha = 0.005$）の比較（パラメータ = 30～70）}}{}{}\protected@file@percent }
+\newlabel{tab:normal_vs_csr}{{4}{}{}{}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {9}{\ignorespaces 各モデルのモデルサイズと MSE の関係}}{}{}\protected@file@percent }
+\newlabel{fig:no4}{{9}{}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.5}モデルサイズと MSE の関係}{}{}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {10}{\ignorespaces モデルサイズと MSE の関係}}{}{}\protected@file@percent }
+\newlabel{fig:model_tradeoff}{{10}{}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.6}モデルサイズと推論時間の関係}{}{}\protected@file@percent }
+\citation{toshiba2019}
+\@writefile{lof}{\contentsline {figure}{\numberline {11}{\ignorespaces モデルサイズと推論時間の関係}}{}{}\protected@file@percent }
+\newlabel{fig:time_tradeoff}{{11}{}{}{}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {2}考察}{}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.1}MSEとモデルサイズの関係}{}{}\protected@file@percent }
+\citation{toshiba2019}
+\citation{ngo2025}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.2}削減率の挙動に関する考察}{}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.3}モデルサイズと推論時間の関係}{}{}\protected@file@percent }
 \bibcite{soumu2021}{1}
 \bibcite{iot_resource_management}{2}
 \bibcite{toshiba2019}{3}
-\bibcite{iotmanagement}{4}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {0.3.3}量子化}{}{}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {0.4}評価指標}{}{}\protected@file@percent }
-\gdef \@abspage@last{5}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.4}圧縮モデルとベースラインモデルの比較}{}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {3}まとめ}{}{}\protected@file@percent }
+\bibcite{ngo2025}{4}
+\gdef \@abspage@last{19}

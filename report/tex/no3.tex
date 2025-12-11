@@ -1,16 +1,247 @@
-余裕があるなら，それぞれの方法を2つずつ実装したものとの比較も載せる
 \section{実験結果}
+本節では，カラーコード読み取りハードウェア向けに設計した深層学習モデルについて，
+スパース化・量子化・CSR 化による圧縮が MSE とモデルサイズに与える影響を整理して述べる．
+MSE は 複数回の実験の平均値 mean を用い，モデルサイズは 作成される.hファイルの大きさを指標とした．
 
-\subsection{モデル実装前のパラメーター増加に伴う精度変化}
+\subsection{ベースライン\（非圧縮モデル\）の性能}
+圧縮を行っていないベースラインモデルnomal\_modelの性能を確認する．
+表\ref{tab:model_results}は，パラメータ数を変化させたつのベースラインモデルの結果を表にまとめたものである．
+nomal\_model\_70は，モデルサイズが大きく測定不能であった．
+
+また，図\ref{no7}はパラメータとMSE（平均）の関係を示したものである．
+図\ref{no7}より，MSEがパラメータ数に依存せず分布している様子が確認できた．
+
+\begin{table}[htbp]
+    \centering
+    \caption{ベースモデルの計測結果（model_70 は測定不能）}
+    \label{tab:model_results}
+    \resizebox{\textwidth}{!}{
+    \begin{tabular}{lcccccccc}
+    \hline
+    \textbf{ファイル名} & \textbf{容量（B）} & \textbf{時間（ms）} &
+    \textbf{1回目} & \textbf{2回目} & \textbf{3回目} & \textbf{4回目} & \textbf{5回目} & \textbf{平均} \\
+    \hline
+    nomal\_model\_30 & 16458 & 716  & 391.52 & 608.52 & 240.52 & 319.37 & 528.70 & 417.726 \\
+    nomal\_model\_40 & 27885 & 1177 & 441.00 & 462.70 & 516.30 & 421.78 & 431.93 & 454.742 \\
+    nomal\_model\_50 & 42273 & 1655 & 195.37 & 366.37 & 371.07 & 224.67 & 87.22  & 248.94 \\
+    nomal\_model\_60 & 59560 & 2399 & 311.93 & 582.30 & 320.04 & 593.63 & 424.52 & 446.484 \\
+    nomal\_model\_70 & 79630 & ---  & ---    & ---    & ---    & ---    & ---    & --- \\
+    \hline
+    \end{tabular}
+    }
+\end{table}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.9\columnwidth]{../img/tex_3/no7.png}
+    \caption{パラメータと MSE の関係}
+    \label{no7}
+\end{figure}
 
 
-\subsection{スパース化の閾値の検討}
+    
+
+\subsection{スパース化のみ適応したモデルの性能}
+ベースラインモデルに対してスパース化を適用したモデルの結果を表\ref{h_results}に示す．
+比較の公平性を保つため，モデルのパラメータ数を 30 に固定し，スパース化の閾値aのみを変化させて性能への影響を評価した．
+スパース化では，重みが閾値a以下である要素を 0 に置き換えることでモデルを軽量化し，計算コストの削減を図る．
+本実験では a=0.05，0.01，0.005 の3種類を設定し，それぞれのモデルで MSE を5回測定し，その平均値を算出した.
+さらに，スパース化による モデルサイズの減少率 と 精度（MSE）の変化量 を併せて評価し，削減率と精度のトレードオフについても検討した．
+
+また，図\ref{fig:spare}は閾値とMSE（平均）の関係を示したものである．
+図より，閾値が小さくなるにつれて MSE が低下する傾向が確認できる．
+
+\begin{table}[htbp]
+    \centering
+    \caption{スパース化モデル（パラメータ=30）の測定結果}
+    \label{h_results}
+    \footnotesize
+    \setlength{\tabcolsep}{4pt} % 列幅を少し詰める
+    \begin{tabular}{lccccccccccc}
+    \hline
+    \textbf{ファイル名} & \textbf{実装容量（B）} & \textbf{ベース容量（B）} & \textbf{削減率} &
+    \textbf{時間} &
+    \textbf{1回目} & \textbf{2回目} & \textbf{3回目} & \textbf{4回目} & \textbf{5回目} &
+    \textbf{平均} \\
+    \hline
+    sparse\_p30\_0.005 & 7550 & 16458 & 0.5413 &
+    11424 &
+    286.30 & 163.37 & 209.30 & 295.67 & 483.70 &
+    287.668 \\
+    sparse\_p30\_0.01  & 7540 & 16458 & 0.5419 &
+    11424 &
+    124.11 & 868.44 & 487.89 & 605.22 & 127.52 &
+    442.636 \\
+    sparse\_p30\_0.05  & 7440 & 16458 & 0.5479 &
+    11424 &
+    719.74 & 916.56 & 470.22 & 755.52 & 117.74 &
+    595.956 \\
+    \hline
+    \end{tabular}
+\end{table}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.9\columnwidth]{../img/tex_3/no3.png}
+    \caption{閾値と MSE の関係}
+    \label{fig:spare}
+\end{figure}
+
+    
 
 
-\subsection{モデル実装による性能比較}
-メモリ縮減効果、実行速度、推論性能の比較
-% for f in *.h; do 
-bytes=$(stat -f%z "$f")
-bits=$((bytes * 8))
-echo "$f : $bytes bytes, $bits bits"
-done
+
+\subsection{CSR 形式と int8 量子化を適応したモデルの性能}
+ベースラインモデルに対してスパース化および CSR 形式と int8 量子化を適用したモデルの結果を
+表\ref{tab:csr_int8_results}に示す．
+ここでは，前節の検討で最も良好であった閾値 (\alpha = 0.005) を用い，
+モデルのパラメータ数だけを 30〜1200 の範囲で変化させて評価を行った．
+各条件について最大 5 回推論を行い，そのときの MSE の平均値を MSE として算出した．
+なお，一部の条件（パラメータ 80〜700，1100）は 
+3回分の結果から平均値を求めた．
+ 1200 で容量釣果をしたため MSE は測定不能であった．
+
+圧縮後のモデルサイズは 2368〜20119 バイト となり，
+元のモデルサイズと比較して削減率（compression ratio）はおよそ 85.6〜99.9\% であった．
+MSE\(平均\) は パラメータ 30〜1100 の範囲で 216.73〜526.49 の値を取り，
+最小値は パラメータ 70 のときの 216.73 であった．また，パラメータ 1100 でも 216.87 と同程度の MSE を示した．
+
+
+図\ref{no5}はパラメータと削減率の関係を示したものである．
+図\ref{no5}より，パラメータ増加するにつれ削減率が上昇していることが確認できた．
+
+また，図\ref{no6}はパラメータとMSE（平均）の関係を示したものである
+図\ref{no6}より，MSEがパラメータ数に依存せず分布している様子が確認できた．
+
+\begin{table*}[htbp]
+    \centering
+    \caption{Sparse + CSR + int8（閾値 $\alpha = 0.005$）モデルの測定結果}
+    \label{tab:csr_int8_results}
+    \footnotesize
+    \setlength{\tabcolsep}{3pt} % 数値列の間隔を少し詰める
+    \begin{tabularx}{\textwidth}{Xrrrrrrrrrrr}
+    \hline
+    ファイル名 & 実装容量（B） & ベース容量（B） & 削減率 & 時間 &
+    1回目 & 2回目 & 3回目 & 4回目 & 5回目 & 平均 \\
+    \hline
+    model\_csr\_int8\_p30  &  2368 &   16458 & 0.8561 &  7924 & 191.44 & 347.63 & 563.44 & 437.93 & 357.93 & 379.674 \\
+    model\_csr\_int8\_p40  &  2578 &   27885 & 0.9075 &  8032 & 512.44 & 542.33 & 325.44 & 454.26 & 424.15 & 451.724 \\
+    model\_csr\_int8\_p50  &  2815 &   42273 & 0.9334 &  8188 & 491.26 & 389.89 & 421.78 & 247.89 & 534.93 & 417.150 \\
+    model\_csr\_int8\_p60  &  2918 &   59560 & 0.9510 &  8272 & 457.56 & 205.37 & 326.19 & 249.30 & 437.33 & 335.150 \\
+    model\_csr\_int8\_p70  &  3053 &   79630 & 0.9617 &  8324 & 173.00 & 466.00 & 278.52 &  23.19 & 142.96 & 216.734 \\
+    model\_csr\_int8\_p80  &  3097 &  103073 & 0.9700 &  8384 & 247.56 & 400.52 & 363.74 &   ---  &   ---  & 337.273 \\
+    model\_csr\_int8\_p90  &  3482 &  129080 & 0.9730 &  8616 & 540.48 & 318.33 & 581.96 &   ---  &   ---  & 480.257 \\
+    model\_csr\_int8\_p100 &  3650 &  158034 & 0.9769 &  8696 & 469.59 & 585.78 & 524.11 &   ---  &   ---  & 526.493 \\
+    model\_csr\_int8\_p200 &  5278 &  609431 & 0.9913 &  9608 & 250.67 & 281.56 & 361.74 &   ---  &   ---  & 297.990 \\
+    model\_csr\_int8\_p500 &  5278 & 3720238 & 0.9986 & 12660 & 246.19 & 338.70 & 320.48 &   ---  &   ---  & 301.790 \\
+    model\_csr\_int8\_p700 & 10290 & 7255329 & 0.9986 & 14600 & 301.11 & 386.22 & 222.15 &   ---  &   ---  & 303.160 \\
+    model\_csr\_int8\_p1000& 13566 &14759027 & 0.9991 & 17632 & 274.74 & 261.85 & 381.93 &   ---  &   ---  & 306.173 \\
+    model\_csr\_int8\_p1100& 20119 &17842882 & 0.9994 & 18616 & 150.26 & 210.41 & 289.93 &   ---  &   ---  & 216.867 \\
+    model\_csr\_int8\_p1200& 20119 &     --- &   ---  & --- &   ---  &   ---  &   ---  &   ---  &   ---  &   ---  \\
+    \hline
+    \end{tabularx}
+\end{table*}
+
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.9\columnwidth]{../img/tex_3/no5.png}
+    \caption{パラメータ と 削減率 の関係}
+    \label{no5}
+\end{figure}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.9\columnwidth]{../img/tex_3/no6.png}
+    \caption{パラメータ と MSE の関係}
+    \label{no6}
+\end{figure}
+
+
+
+
+\clearpage
+\subsection{同一パラメータ数における比較}
+ベースラインモデルと Sparse + CSR + int8（$\alpha = 0.005$）を，同一パラメータ数で比較した結果を表\ref{tab:normal_vs_csr}に示す．
+本比較では，パラメータ数を 30～70 に固定し，各モデルの実装容量と MSE（5 回測定の平均値）を整理した．
+
+モデルサイズについては，すべてのパラメータ設定で圧縮後の容量が大幅に削減され，
+削減率は 0.8561～0.9617 の範囲となった．特に パラメータ = 70 では，
+79630 バイトから 3053 バイトへと最も大きな削減が確認された．
+
+MSE の結果は，パラメータ = 30，40，60 において圧縮モデルとベースラインが同程度の値を示し，
+パラメータ = 50 では圧縮モデルが高い MSE を示した．
+また，パラメータ = 70 についてはベースラインの MSE が測定不可であるが，
+圧縮モデルの MSE は 216.734 であった．
+
+図\ref{fig:no4}は，表\ref{tab:normal_vs_csr}の各モデルのMSEとパラメータのデータをグラフ化したものである．
+図からは，MSEがパラメータ数に依存せず分布している様子が確認できる．
+また，2つのモデル間でMSEに大きな差異は見られない．
+
+\begin{table}[htbp]
+    \centering
+    \caption{通常モデルと Sparse + CSR + int8（$\alpha = 0.005$）の比較（パラメータ = 30～70）}
+    \label{tab:normal_vs_csr}
+    \footnotesize
+    \setlength{\tabcolsep}{4pt}
+    \begin{tabular}{cccccc}
+    \hline
+    パラメータ&
+    ベース（B） &
+    CSR+int8（B） &
+    削減率 &
+    ベース（平均） &
+    CSR+int8（平均） \\
+    \hline
+    30 & 16458 & 2368  & 0.8561 & 417.726 & 379.674 \\
+    40 & 27885 & 2578  & 0.9075 & 454.742 & 451.724 \\
+    50 & 42273 & 2815  & 0.9334 & 248.940 & 417.150 \\
+    60 & 59560 & 2918  & 0.9510 & 446.484 & 335.150 \\
+    70 & 79630 & 3053  & 0.9617 & ---     & 216.734 \\
+    \hline
+    \end{tabular}
+\end{table}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.9\columnwidth]{../img/tex_3/no4.png}
+    \caption{各モデルのモデルサイズと MSE の関係}
+    \label{fig:no4}
+\end{figure}
+
+
+\clearpage
+
+\subsection{モデルサイズと MSE の関係}
+図\ref{fig:model_tradeoff} は，ベースラインモデル，Sparse + CSR + int8 を適用したモデルについて，
+モデルサイズと MSE（平均値）の関係を示したものである．
+
+本図より，各モデルにおいてパラメータ数の増加に伴いモデルサイズが大きくなり，
+それに応じて MSE も変化する様子が確認できる．
+特に Sparse + CSR + int8 モデルは，ベースラインに比べて
+大幅にモデルサイズが小さくなる一方で，MSE の分布に相関関係は見られなかった．
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.9\columnwidth]{../img/tex_3/no1.png}
+    \caption{モデルサイズと MSE の関係}
+    \label{fig:model_tradeoff}
+\end{figure}
+
+
+
+\subsection{モデルサイズと推論時間の関係}
+図\ref{fig:time_tradeoff} は，ベースラインモデル，
+Sparse のみ，Sparse + CSR + int8 の 3 種類のモデルについて，
+モデルサイズと推論時間（ms）の関係を示したものである．
+
+図より，ベースラインモデルではモデルサイズの増加に伴い推論時間も増加する相関傾向が見られる．
+また，Sparse + CSR + int8 モデルでもパラメータが500時以外は，同様の傾向が確認できる．
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.9\columnwidth]{../img/tex_3/no2.png}
+    \caption{モデルサイズと推論時間の関係}
+    \label{fig:time_tradeoff}
+\end{figure}
+

@@ -1,5 +1,5 @@
 #include <Arduino.h>
-#include "model_sparse0.001_csr_int8_param1000.h"
+#include "model_sparse0.005_csr_int8_param30.h"
 #define INPUT_SIZE 3
 #define HIDDEN_SIZE1 30
 #define HIDDEN_SIZE2 30
